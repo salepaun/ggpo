@@ -104,6 +104,18 @@ Peer2PeerBackend::DoPoll(int timeout)
    if (!_sync.InRollback()) {
       _poll.Pump(0);
 
+      {
+         const int current_frame = _sync.GetFrameCount();
+
+         // To simulate input delay with only local players present,
+         // check synchronization state on first frame. If only
+         // local players are present, then _synchronizing is always
+         // false -- representing local play w/ input delay.
+         if (current_frame == 0) {
+            CheckInitialSync();
+         }
+      }
+
       PollUdpProtocolEvents();
 
       if (!_synchronizing) {
